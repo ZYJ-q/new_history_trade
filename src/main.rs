@@ -176,7 +176,6 @@ async fn real_time(
                                         // }
                                     let new_week_price = we_price * new_price;
                                     week_transaction_price += new_week_price;
-                                    println!("金额{}", week_transaction_price);
                                     let week_realized_pnl: f64 = value[i]
                                        .as_object()
                                        .unwrap()
@@ -237,7 +236,7 @@ async fn real_time(
                                         // println!("new_price{}",day_price );
                                         let new_day_price = new_price * pri;      
                                         day_transaction_price += new_day_price;        
-                                        println!("金额{}", day_transaction_price);
+                                        // println!("金额{}", day_transaction_price);
                                         let realized_pnl: f64 = value[i]
                                            .as_object()
                                            .unwrap()
@@ -269,6 +268,8 @@ async fn real_time(
                     }
                 }
             }
+            
+            println!("金额{}, name:{}", week_transaction_price, name);
     
             
 
