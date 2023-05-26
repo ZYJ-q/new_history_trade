@@ -247,9 +247,9 @@ async fn real_time(
             }
             
             println!("金额{}, name:{}, day金额{}", week_transaction_price, name, day_transaction_price);
-            trade_object.insert(String::from("name"), Value::from(name));
-            trade_object.insert(String::from("week_price"), Value::from(week_transaction_price));
-            trade_object.insert(String::from("day_price"), Value::from(day_transaction_price));
+            trade_object.insert(String::from("name"), Value::from(name.to_string()));
+            trade_object.insert(String::from("week_price"), Value::from(week_transaction_price.to_string()));
+            trade_object.insert(String::from("day_price"), Value::from(day_transaction_price.to_string()));
             trade_histories.push_back(Value::from(trade_object));
 
     
