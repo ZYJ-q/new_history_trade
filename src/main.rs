@@ -109,7 +109,7 @@ async fn real_time(
                     .as_str()
                     .unwrap(),
             );
-            let name:f64 = binance_config.get("name").unwrap().as_str().unwrap().parse().unwrap();
+            let name= binance_config.get("name").unwrap().as_str().unwrap();
              let mut day_transaction_price = 0.0;
              let mut week_transaction_price = 0.0;
              let mut new_price = 0.0;
@@ -256,7 +256,7 @@ async fn real_time(
             
 
         }
-        let res = trade_mapper::TradeMapper::updata_price(Vec::from(trade_histories.clone()));
+        let res = trade_mapper::TradeMapper::insert_equity(Vec::from(trade_histories.clone()));
         println!("更新金额数据{}, 数据{:?}", res, Vec::from(trade_histories.clone()));
 
 
