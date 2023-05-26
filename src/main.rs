@@ -47,7 +47,7 @@ async fn real_time(
         // let mut response: Map<String, Value> = Map::new();
         // let mut json_data: Map<String, Value> = Map::new();
         let mut map: Map<String, Value> = Map::new();
-        let mut equity_histories: VecDeque<Value> = VecDeque::new();
+        let mut trade_histories: VecDeque<Value> = VecDeque::new();
         
 
         // 监控服务器状态
@@ -88,7 +88,7 @@ async fn real_time(
         // map.insert(String::from("server"), Value::from(server_process));
 
         for f_config in binance {
-            let mut equity_map: Map<String, Value> = Map::new();
+        let mut trade_object: Map<String, Value> = Map::new();
         let now = Utc::now();
         let date = format!("{}", now.format("%Y/%m/%d %H:%M:%S"));
             let binance_config = f_config.as_object().unwrap();
@@ -111,16 +111,15 @@ async fn real_time(
             );
             let name = binance_config.get("name").unwrap().as_str().unwrap();
              let mut day_transaction_price = 0.0;
-
              let mut week_transaction_price = 0.0;
              let mut new_price = 0.0;
              let mut day_pnl = 0.0;
              let mut week_pnl = 0.0;
              let dt = Local::now().timestamp_millis();
              let last_day = dt - 1000*60*60*24;
+             
 
             for symbol_v in symbols {
-                let mut trade_object: Map<String, Value> = Map::new();
                 let symbol = symbol_v.as_str().unwrap();
                 let symbol = format!("{}", symbol);
                 // println!("当前的symbol{}", symbol);
@@ -213,30 +212,8 @@ async fn real_time(
                                             .as_str()
                                             .unwrap();
                                         let pri: f64= price.parse().unwrap();
-                                        // let symbos = value[i]
-                                        //     .as_object()
-                                        //     .unwrap()
-                                        //     .get("symbol")
-                                        //     .unwrap()
-                                        //     .as_str()
-                                        //     .unwrap();
-                                        // println!("要传的数据{}", symbos);
-                                        
-                                        // if let Some(data) = http_api.get_klines(&symbos).await {
-                                        //     let v: Value = serde_json::from_str(&data).unwrap();
-                                        //     let price_obj = v.as_object().unwrap();
-                        
-                                        //     let price:f64 = price_obj.get("price").unwrap().as_str().unwrap().parse().unwrap();
-                                        //     println!("最新价格{}", price);
-                                        //     // let new_amt = position_amt * price;
-                                        //     // day_price = pri * price;
-                                        // } else {
-                                        //     println!("没有数据")
-                                        // }        
-                                        // println!("new_price{}",day_price );
                                         let new_day_price = new_price * pri;      
-                                        day_transaction_price += new_day_price;        
-                                        // println!("金额{}", day_transaction_price);
+                                        day_transaction_price += new_day_price;      
                                         let realized_pnl: f64 = value[i]
                                            .as_object()
                                            .unwrap()
@@ -269,13 +246,18 @@ async fn real_time(
                 }
             }
             
-            println!("金额{}, name:{}", week_transaction_price, name);
+            println!("金额{}, name:{}, day金额{}", week_transaction_price, name, day_transaction_price);
+            trade_object.insert(String::from("name"), Value::from(name));
+            trade_object.insert(String::from("week_price"), Value::from(week_transaction_price));
+            trade_object.insert(String::from("day_price"), Value::from(day_transaction_price));
+            trade_histories.push_back(Value::from(trade_object));
+
     
             
 
         }
-        let res = trade_mapper::TradeMapper::insert_equity(Vec::from(equity_histories.clone()));
-        println!("插入权益数据{}, 数据{:?}", res, Vec::from(equity_histories.clone()));
+        let res = trade_mapper::TradeMapper::updata_price(Vec::from(trade_histories.clone()));
+        println!("更新金额数据{}, 数据{:?}", res, Vec::from(trade_histories.clone()));
 
 
         // 获取账户信息

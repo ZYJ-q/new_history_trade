@@ -37,6 +37,33 @@ impl TradeMapper {
       }
     }
   }
+
+  pub fn updata_price(equitys:Vec<Value>) -> bool {
+    // 连接数据库
+    let mut conn = get_connect();
+    // let query_id = conn.exec_first(, params)
+
+    let flag = conn.exec_batch(
+      r"update trade_price set week_price=:week_price, day_price=:day_price 
+      where name=:name",
+      equitys.iter().map(|p| params! {
+        "name" => &p["name"],
+        "week_price" => &p["week_price"],
+        "day_price" => &p["day_price"],
+      })
+    );
+
+    match flag {
+      Ok(_c) => {
+        println!("insert success!");
+        return true;
+      },
+      Err(e) => {
+        eprintln!("error:{}", e);
+        return false;
+      }
+    }
+  }
 }
 
 
