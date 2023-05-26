@@ -268,8 +268,8 @@ async fn real_time(
 
 
         // 等待下次执行
-        info!("waiting for next real time task...({})", 4320000 * 10);
-        tokio::time::delay_for(Duration::from_millis(4320000 * 10)).await;
+        info!("waiting for next real time task...({})", 12000 * 10);
+        tokio::time::delay_for(Duration::from_millis(12000 * 10)).await;
     }
 }
 
