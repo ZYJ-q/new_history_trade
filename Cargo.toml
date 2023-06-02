@@ -1,5 +1,5 @@
 [package]
-name = "test_alarm"
+name = "get_pnl"
 version = "0.1.0"
 edition = "2021"
 
