@@ -136,7 +136,7 @@ async fn real_time(
                                             let price:f64 = price_obj.get("price").unwrap().as_str().unwrap().parse().unwrap();
                                             // let new_amt = position_amt * price;
                                             new_price = price;
-                                            println!("最新价格{}", price);
+                                            // println!("最新价格{}", price);
                                             // new_week_price = we_price * price;
                                         }
                 if let Some(data) = binance_futures_api.trade_hiostory(&symbol, &end, &time_id).await {
