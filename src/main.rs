@@ -26,8 +26,6 @@ async fn real_time(
     // let mut end = 6;
     let mut end = 7;
     let mut time_id = 1;
-    let mut day_pnl = 0.0;
-    let mut week_pnl = 0.0;
 
     // 每个品种的上一个trade_id
     let mut last_trade_ids: HashMap<String, u64> = HashMap::new();
@@ -119,7 +117,8 @@ async fn real_time(
              let mut day_transaction_price = 0.0;
              let mut week_transaction_price = 0.0;
              let mut new_price = 0.0;
-             
+             let mut day_pnl = 0.0;
+             let mut week_pnl = 0.0;
              let dt = Local::now().timestamp_millis();
              let last_day = dt - 1000*60*60*24;
              
@@ -136,7 +135,7 @@ async fn real_time(
                                             let price:f64 = price_obj.get("price").unwrap().as_str().unwrap().parse().unwrap();
                                             // let new_amt = position_amt * price;
                                             new_price = price;
-                                            // println!("最新价格{}", price);
+                                            println!("最新价格{}", price);
                                             // new_week_price = we_price * price;
                                         }
                 if let Some(data) = binance_futures_api.trade_hiostory(&symbol, &end, &time_id).await {
@@ -258,7 +257,7 @@ async fn real_time(
             trade_object.insert(String::from("day_price"), Value::from(day_transaction_price));
             trade_histories.push_back(Value::from(trade_object));
 
-            let res = trade_mapper::TradeMapper::updata_price(Vec::from(trade_histories.clone()));
+            let res = trade_mapper::TradeMapper::insert_equity(Vec::from(trade_histories.clone()));
         println!("更新金额数据{}, 数据{:?}", res, Vec::from(trade_histories.clone()));
 
     
@@ -295,8 +294,8 @@ async fn real_time(
 
 
         // 等待下次执行
-        info!("waiting for next real time task...({})", 6000 * 10);
-        tokio::time::delay_for(Duration::from_millis(6000 * 10)).await;
+        info!("waiting for next real time task...({})", 1000 * 10);
+        tokio::time::delay_for(Duration::from_millis(1000 * 10)).await;
     }
 }
 
