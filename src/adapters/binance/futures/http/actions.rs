@@ -1,4 +1,4 @@
-use chrono::Utc;
+use chrono::{Utc, DateTime, NaiveDateTime, Local};
 use reqwest::Method;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -135,7 +135,7 @@ impl BinanceFuturesApi {
         }
     }
 
-    pub async fn trade_hiostory(&self, symbol: &str) -> Option<String> {
+    pub async fn trade_hiostory(&self, symbol: &str, end:&i64, time_id:&i64) -> Option<String> {
         let mut params: HashMap<String, Value> = HashMap::new();
         params.insert(String::from("symbol"), Value::from(symbol));
 
@@ -145,16 +145,35 @@ impl BinanceFuturesApi {
 
         let now_time = Utc::now().timestamp_millis();
         params.insert(String::from("timestamp"), Value::from(now_time));
-        // if end == &0 {
-        //     params.insert(String::from("startTime"), Value::from(time - 1000*60*60*24 * (end+1)));
-        //     params.insert(String::from("endTime"), Value::from(time - 1000*60*60*24 * end));
-        // } else {
-        //     params.insert(String::from("startTime"), Value::from(.timestamp_millis()));
-        //     params.insert(String::from("endTime"), Value::from());
-        // }
+        
+        let time = Local::now().timestamp_millis();
+        let last_time = time - 1000*60*60*24 * end;
 
-        // println!("endTime:{:?}", params.insert(String::from("endTime"), Value::from(now_time - 1000*60*60*24 * end)));
-        // println!("startTime:{:?}", params.insert(String::from("startTime"), Value::from(now_time - 1000*60*60*24 * (end+1))));
+        let mut end_times = 0;
+        
+        if time_id == &1 {
+            end_times = time - 1000*60*60*24 * end;
+        } else {
+            end_times = last_time + 1000*60*60 * (time_id -1)
+        }
+
+        
+        let start_datetime: DateTime<Utc> = DateTime::from_utc(NaiveDateTime::from_timestamp_millis(end_times).unwrap(), Utc,);
+        let end_datetime: DateTime<Utc> = DateTime::from_utc(NaiveDateTime::from_timestamp_millis(&end_times + 1000*60*60).unwrap(), Utc,);
+         
+        let end_time= format!("{} ", end_datetime.format("%Y-%m-%d %H:%M:%S"));
+        let start_time = format!("{} ", start_datetime.format("%Y-%m-%d %H:%M:%S"));
+        println!("-------------end------------{:?}", end_time);
+        println!("------------start----------{}", start_time);
+
+        params.insert(String::from("endTime"), Value::from(&end_times + 1000*60*60));
+        if end != &0 {
+            if time_id == &1 {
+                params.insert(String::from("startTime"), Value::from(time - 1000*60*60*24 * end));
+            } else {
+                params.insert(String::from("startTime"), Value::from(last_time + 1000*60*60 * (time_id -1)));
+            }
+        }
 
 
         let response = self

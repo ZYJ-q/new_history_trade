@@ -24,6 +24,10 @@ async fn real_time(
     info!("get ready for real time loop");
     let running = true;
     // let mut end = 6;
+    let mut end = 7;
+    let mut time_id = 1;
+    let mut day_pnl = 0.0;
+    let mut week_pnl = 0.0;
 
     // 每个品种的上一个trade_id
     let mut last_trade_ids: HashMap<String, u64> = HashMap::new();
@@ -47,7 +51,7 @@ async fn real_time(
         // let mut response: Map<String, Value> = Map::new();
         // let mut json_data: Map<String, Value> = Map::new();
         let mut map: Map<String, Value> = Map::new();
-        let mut trade_histories: VecDeque<Value> = VecDeque::new();
+        
         
 
         // 监控服务器状态
@@ -88,7 +92,9 @@ async fn real_time(
         // map.insert(String::from("server"), Value::from(server_process));
 
         for f_config in binance {
+        let mut trade_histories: VecDeque<Value> = VecDeque::new();
         let mut trade_object: Map<String, Value> = Map::new();
+        
         let now = Utc::now();
         let date = format!("{}", now.format("%Y/%m/%d %H:%M:%S"));
             let binance_config = f_config.as_object().unwrap();
@@ -113,8 +119,7 @@ async fn real_time(
              let mut day_transaction_price = 0.0;
              let mut week_transaction_price = 0.0;
              let mut new_price = 0.0;
-             let mut day_pnl = 0.0;
-             let mut week_pnl = 0.0;
+             
              let dt = Local::now().timestamp_millis();
              let last_day = dt - 1000*60*60*24;
              
@@ -134,7 +139,7 @@ async fn real_time(
                                             println!("最新价格{}", price);
                                             // new_week_price = we_price * price;
                                         }
-                if let Some(data) = binance_futures_api.trade_hiostory(&symbol).await {
+                if let Some(data) = binance_futures_api.trade_hiostory(&symbol, &end, &time_id).await {
                     let v: Value = serde_json::from_str(&data).unwrap();
                     match v.as_array() {
                         Some(value) => {
@@ -143,6 +148,7 @@ async fn real_time(
                             } else {
                                 // println!("成交历史数据{:?}", value);
                                 for i in 0..value.len() {
+                                    
                                 
                                 
                                     let week_price = value[i]
@@ -252,15 +258,36 @@ async fn real_time(
             trade_object.insert(String::from("day_price"), Value::from(day_transaction_price));
             trade_histories.push_back(Value::from(trade_object));
 
+            let res = trade_mapper::TradeMapper::updata_price(Vec::from(trade_histories.clone()));
+        println!("更新金额数据{}, 数据{:?}", res, Vec::from(trade_histories.clone()));
+
     
             
 
         }
-        let res = trade_mapper::TradeMapper::updata_price(Vec::from(trade_histories.clone()));
-        println!("更新金额数据{}, 数据{:?}", res, Vec::from(trade_histories.clone()));
+        
 
 
         // 获取账户信息
+
+        let time = Local::now().timestamp_millis();
+        let last_time = time - 1000*60*60*24 * end;
+        if time_id == 24 {
+            time_id = 1;
+            if end != 0 {
+                end -= 1
+            } else {
+                end = 0
+            }
+        } else {
+            if last_time < time {
+                time_id += 1
+            } else if last_time == time  {
+                time_id = time_id
+            } else {
+                time_id -= 1
+            }
+        }
         
 
         
