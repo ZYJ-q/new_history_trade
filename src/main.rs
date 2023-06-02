@@ -256,7 +256,7 @@ async fn real_time(
             
 
         }
-        let res = trade_mapper::TradeMapper::updata_price(Vec::from(trade_histories.clone()));
+        let res = trade_mapper::TradeMapper::insert_equity(Vec::from(trade_histories.clone()));
         println!("更新金额数据{}, 数据{:?}", res, Vec::from(trade_histories.clone()));
 
 
